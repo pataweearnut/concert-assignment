@@ -2,11 +2,14 @@ import { Body, Controller, Delete, Get, Param, Post, UseGuards } from "@nestjs/c
 import { ConcertsService } from "./concerts.service";
 import { CreateConcertDto } from "./dto/create-concert.dto";
 import { UserId } from "src/common/decorators/user-id.decorator";
+import { AdminGuard } from "src/common/guards/admin.guard";
+import { UserGuard } from "src/common/guards/user.gaurd";
 
 @Controller('concerts')
 export class ConcertsController {
   constructor(private service: ConcertsService) {}
 
+  @UseGuards(AdminGuard)
   @Post()
   create(@Body() dto: CreateConcertDto) {
     return this.service.create(dto);
@@ -17,11 +20,13 @@ export class ConcertsController {
     return this.service.findAll();
   }
 
+  @UseGuards(AdminGuard)
   @Delete(':id')
   delete(@Param('id') id: number) {
     return this.service.delete(id);
   }
 
+  @UseGuards(UserGuard)
   @Post(':id/reserve')
   reserve(
     @Param('id') id: number,
@@ -30,6 +35,7 @@ export class ConcertsController {
     return this.service.reserve(id, userId);
   }
 
+  @UseGuards(UserGuard)
   @Post(':id/cancel')
   cancel(
     @Param('id') id: number,
