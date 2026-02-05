@@ -15,7 +15,6 @@ type ConcertListProps = {
 
 export function ConcertList({ concerts, onDeleted }: ConcertListProps) {
     const { userId, role } = useAuth();
-
     const [selected, setSelected] =
         useState<{ id: number; name: string } | null>(null);
     const [loading, setLoading] = useState(false);
@@ -84,7 +83,7 @@ export function ConcertList({ concerts, onDeleted }: ConcertListProps) {
             <div className="space-y-8">
                 {concerts.map((c, k) => (
                     <div key={k} className="bg-white text-black rounded-xl p-10 border border-[#C2C2C2]">
-                        <h3 className="text-[#1692EC] text-[28px] md:text-[36px] font-semibold mb-2">
+                        <h3 className={`text-[#1692EC] text-[28px] ${role === 'ADMIN' ? 'md:text-[32px]':'md:text-[40px]'} font-semibold mb-6`}>
                             {c.name}
                         </h3>
 
