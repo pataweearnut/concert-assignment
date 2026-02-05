@@ -1,4 +1,4 @@
-import { SidebarItem } from '@/src/types';
+import { SidebarItem } from '@/src/types/SidebarItem';
 
 export const SIDEBAR_MENU_CONFIG: SidebarItem[] = [
   {

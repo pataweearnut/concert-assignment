@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { apiFetch } from '@/src/lib/api';
 import { useAuth } from '@/src/context/AuthContext';
-import { Concert } from '@/src/types';
+import { Concert } from '@/src/types/Concert';
 import { ConfirmDeleteModal } from '@/src/components/ConfirmDeleteModel';
 import { showToast } from './showToast';
 
