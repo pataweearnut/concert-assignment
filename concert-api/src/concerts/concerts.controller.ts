@@ -1,9 +1,17 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from "@nestjs/common";
-import { ConcertsService } from "./concerts.service";
-import { CreateConcertDto } from "./dto/create-concert.dto";
-import { UserId } from "../common/decorators/user-id.decorator";
-import { AdminGuard } from "../common/guards/admin.guard";
-import { UserGuard } from "../common/guards/user.gaurd";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { ConcertsService } from './concerts.service';
+import { CreateConcertDto } from './dto/create-concert.dto';
+import { UserId } from '../common/decorators/user-id.decorator';
+import { AdminGuard } from '../common/guards/admin.guard';
+import { UserGuard } from '../common/guards/user.gaurd';
 
 @Controller('concerts')
 export class ConcertsController {
@@ -21,9 +29,7 @@ export class ConcertsController {
   }
 
   @Get('reservations')
-  findAllWithReservation(
-    @UserId() userId: string,
-  ) {
+  findAllWithReservation(@UserId() userId: string) {
     return this.service.findAllWithReservation(userId);
   }
 
@@ -35,19 +41,13 @@ export class ConcertsController {
 
   @UseGuards(UserGuard)
   @Post(':id/reserve')
-  reserve(
-    @Param('id') id: number,
-    @UserId() userId: string,
-  ) {
+  reserve(@Param('id') id: number, @UserId() userId: string) {
     return this.service.reserve(id, userId);
   }
 
   @UseGuards(UserGuard)
   @Post(':id/cancel')
-  cancel(
-    @Param('id') id: number,
-    @UserId() userId: string,
-  ) {
+  cancel(@Param('id') id: number, @UserId() userId: string) {
     return this.service.cancel(id, userId);
   }
 }

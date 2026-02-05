@@ -5,9 +5,7 @@ import { AdminGuard } from '../common/guards/admin.guard';
 @UseGuards(AdminGuard)
 @Controller('statistics')
 export class StatisticsController {
-  constructor(
-    private readonly statisticsService: StatisticsService,
-  ) {}
+  constructor(private readonly statisticsService: StatisticsService) {}
 
   @Get()
   getStatistics() {

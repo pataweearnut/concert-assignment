@@ -1,5 +1,10 @@
-import { ReservationStatus } from "src/utils/constants";
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { ReservationStatus } from '../utils/constants';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Reservation {

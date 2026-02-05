@@ -16,7 +16,7 @@ import { AuthModule } from './auth/auth.module';
     ConcertsModule,
     ReservationsModule,
     StatisticsModule,
-    AuthModule
+    AuthModule,
   ],
 })
 export class AppModule {}

@@ -35,37 +35,36 @@ export class ConcertsService {
     userId: string,
   ): Promise<(Concert & { isReservedByUser: boolean })[]> {
     const concerts = await this.concertRepo.find();
-  
+
     if (!userId) {
-      return concerts.map(c => ({
+      return concerts.map((c) => ({
         ...c,
         isReservedByUser: false,
       }));
     }
-  
+
     // Get ALL reservations for this user, newest first
     const reservations = await this.reservationRepo.find({
       where: { userId },
       order: { createdAt: 'DESC' },
     });
-  
+
     // Track latest state per concert
     const latestStatusByConcert = new Map<number, ReservationStatus>();
-  
+
     for (const r of reservations) {
       // first time we see a concertId = latest event
       if (!latestStatusByConcert.has(r.concertId)) {
         latestStatusByConcert.set(r.concertId, r.status);
       }
     }
-  
-    return concerts.map(c => ({
+
+    return concerts.map((c) => ({
       ...c,
       isReservedByUser:
         latestStatusByConcert.get(c.id) === ReservationStatus.RESERVE,
     }));
   }
-  
 
   async delete(id: number): Promise<void> {
     const { affected } = await this.concertRepo.delete(id);
@@ -76,6 +75,15 @@ export class ConcertsService {
 
   async reserve(concertId: number, userId: string): Promise<Reservation> {
     await this.assertConcertExists(concertId);
+
+    const latest = await this.reservationRepo.findOne({
+      where: { concertId, userId },
+      order: { id: 'DESC' },
+    });
+
+    if (latest?.status === ReservationStatus.RESERVE) {
+      throw new BadRequestException('Duplicate reservation');
+    }
 
     const seatUpdated = await this.decrementSeat(concertId);
     if (!seatUpdated) {
@@ -90,11 +98,6 @@ export class ConcertsService {
       });
     } catch (error) {
       await this.restoreSeat(concertId);
-
-      if (error.code === 'SQLITE_CONSTRAINT') {
-        throw new BadRequestException('Duplicate reservation');
-      }
-
       throw error;
     }
   }
@@ -105,24 +108,16 @@ export class ConcertsService {
     await this.concertRepo.manager.transaction(async (manager) => {
       const reservationRepo = manager.getRepository(Reservation);
       const concertRepo = manager.getRepository(Concert);
-  
-      const hasActiveReservation = await reservationRepo.exist({
-        where: {
-          concertId,
-          userId,
-          status: ReservationStatus.RESERVE,
-        },
+      const latest = await reservationRepo.findOne({
+        where: { concertId, userId },
+        order: { id: 'DESC' },
       });
-  
-      if (!hasActiveReservation) {
+
+      if (!latest || latest.status !== ReservationStatus.RESERVE) {
         return;
       }
-  
-      await concertRepo.increment(
-        { id: concertId },
-        'availableSeats',
-        1,
-      );
+
+      await concertRepo.increment({ id: concertId }, 'availableSeats', 1);
 
       await reservationRepo.save({
         concertId,
@@ -131,7 +126,6 @@ export class ConcertsService {
       });
     });
   }
-  
 
   private async decrementSeat(concertId: number): Promise<boolean> {
     const result = await this.concertRepo
@@ -146,11 +140,7 @@ export class ConcertsService {
   }
 
   private async restoreSeat(concertId: number): Promise<void> {
-    await this.concertRepo.increment(
-      { id: concertId },
-      'availableSeats',
-      1,
-    );
+    await this.concertRepo.increment({ id: concertId }, 'availableSeats', 1);
   }
 
   private async assertConcertExists(concertId: number): Promise<void> {

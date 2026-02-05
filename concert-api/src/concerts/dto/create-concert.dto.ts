@@ -1,13 +1,13 @@
-import { IsInt, IsNotEmpty, Min } from "class-validator";
+import { IsInt, IsNotEmpty, Min } from 'class-validator';
 
 export class CreateConcertDto {
-    @IsNotEmpty()
-    name: string;
+  @IsNotEmpty()
+  name: string;
 
-    @IsNotEmpty()
-    description: string;
+  @IsNotEmpty()
+  description: string;
 
-    @IsInt()
-    @Min(1)
-    totalSeats: number;
+  @IsInt()
+  @Min(1)
+  totalSeats: number;
 }

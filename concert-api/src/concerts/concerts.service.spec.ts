@@ -6,7 +6,7 @@ import { ConcertsService } from '../concerts/concerts.service';
 import { createTestModule } from '../../test/test-utils';
 import { ReservationStatus } from '../utils/constants';
 
-describe('ConcertsService (integration)', () => {
+describe('ConcertsService (integration, event-based)', () => {
   let service: ConcertsService;
   let concertRepo: Repository<Concert>;
   let reservationRepo: Repository<Reservation>;
@@ -57,13 +57,15 @@ describe('ConcertsService (integration)', () => {
     const updated = await concertRepo.findOneBy({ id: concert.id });
     expect(updated.availableSeats).toBe(4);
 
-    const reservations = await reservationRepo.find({
-      where: { status: ReservationStatus.RESERVE },
+    const latest = await reservationRepo.findOne({
+      where: { concertId: concert.id, userId: 'user-1' },
+      order: { createdAt: 'DESC' },
     });
-    expect(reservations.length).toBe(1);
+
+    expect(latest.status).toBe(ReservationStatus.RESERVE);
   });
 
-  it('prevents duplicate reservation by the same user and restores seat', async () => {
+  it('prevents reserving again when user already has active reservation', async () => {
     const concert = await service.create({
       name: 'EDM',
       description: 'Party',
@@ -72,17 +74,12 @@ describe('ConcertsService (integration)', () => {
 
     await service.reserve(concert.id, 'user-1');
 
-    await expect(
-      service.reserve(concert.id, 'user-1'),
-    ).rejects.toThrow('Duplicate reservation');
+    await expect(service.reserve(concert.id, 'user-1')).rejects.toThrow(
+      'Duplicate reservation',
+    );
 
     const updated = await concertRepo.findOneBy({ id: concert.id });
     expect(updated.availableSeats).toBe(4);
-
-    const reservations = await reservationRepo.find({
-      where: { status: ReservationStatus.RESERVE },
-    });
-    expect(reservations.length).toBe(1);
   });
 
   it('throws error when no seats are left', async () => {
@@ -94,15 +91,15 @@ describe('ConcertsService (integration)', () => {
 
     await service.reserve(concert.id, 'user-1');
 
-    await expect(
-      service.reserve(concert.id, 'user-2'),
-    ).rejects.toThrow('No seats left');
+    await expect(service.reserve(concert.id, 'user-2')).rejects.toThrow(
+      'No seats left',
+    );
   });
 
   it('throws NotFoundException when reserving invalid concert', async () => {
-    await expect(
-      service.reserve(9999, 'user-x'),
-    ).rejects.toThrow('Concert not found');
+    await expect(service.reserve(9999, 'user-x')).rejects.toThrow(
+      'Concert not found',
+    );
   });
 
   it('does not overbook seats under concurrent requests', async () => {
@@ -120,13 +117,19 @@ describe('ConcertsService (integration)', () => {
     const updated = await concertRepo.findOneBy({ id: concert.id });
     expect(updated.availableSeats).toBe(0);
 
-    const reservations = await reservationRepo.find({
-      where: { status: ReservationStatus.RESERVE },
+    const latestReservations = await reservationRepo.find({
+      where: { concertId: concert.id },
+      order: { createdAt: 'DESC' },
     });
-    expect(reservations.length).toBe(1);
+
+    const activeCount = latestReservations.filter(
+      (r) => r.status === ReservationStatus.RESERVE,
+    ).length;
+
+    expect(activeCount).toBe(1);
   });
 
-  it('restores seat count when reservation is cancelled', async () => {
+  it('creates cancel transaction and restores seat', async () => {
     const concert = await service.create({
       name: 'Pop Concert',
       description: 'Fun',
@@ -139,10 +142,15 @@ describe('ConcertsService (integration)', () => {
     const updated = await concertRepo.findOneBy({ id: concert.id });
     expect(updated.availableSeats).toBe(1);
 
-    const canceled = await reservationRepo.find({
-      where: { status: ReservationStatus.CANCEL },
+    const history = await reservationRepo.find({
+      where: { concertId: concert.id, userId: 'user-1' },
+      order: { createdAt: 'ASC' },
     });
-    expect(canceled.length).toBe(1);
+
+    expect(history.map((h) => h.status)).toEqual([
+      ReservationStatus.RESERVE,
+      ReservationStatus.CANCEL,
+    ]);
   });
 
   it('does nothing when cancelling without active reservation', async () => {
@@ -152,12 +160,16 @@ describe('ConcertsService (integration)', () => {
       totalSeats: 2,
     });
 
-    await expect(
-      service.cancel(concert.id, 'user-x'),
-    ).resolves.not.toThrow();
+    await expect(service.cancel(concert.id, 'user-x')).resolves.not.toThrow();
 
     const updated = await concertRepo.findOneBy({ id: concert.id });
     expect(updated.availableSeats).toBe(2);
+
+    const history = await reservationRepo.find({
+      where: { concertId: concert.id },
+    });
+
+    expect(history.length).toBe(0);
   });
 
   it('cancel is idempotent (second cancel has no effect)', async () => {
@@ -173,6 +185,12 @@ describe('ConcertsService (integration)', () => {
 
     const updated = await concertRepo.findOneBy({ id: concert.id });
     expect(updated.availableSeats).toBe(1);
+
+    const history = await reservationRepo.find({
+      where: { concertId: concert.id, userId: 'user-1' },
+    });
+
+    expect(history.length).toBe(2);
   });
 
   it('deletes a concert', async () => {
