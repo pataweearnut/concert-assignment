@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { ConcertsService } from "./concerts.service";
 import { CreateConcertDto } from "./dto/create-concert.dto";
+import { UserId } from "src/common/decorators/user-id.decorator";
 
 @Controller('concerts')
 export class ConcertsController {
@@ -19,5 +20,21 @@ export class ConcertsController {
   @Delete(':id')
   delete(@Param('id') id: number) {
     return this.service.delete(id);
+  }
+
+  @Post(':id/reserve')
+  reserve(
+    @Param('id') id: number,
+    @UserId() userId: string,
+  ) {
+    return this.service.reserve(id, userId);
+  }
+
+  @Post(':id/cancel')
+  cancel(
+    @Param('id') id: number,
+    @UserId() userId: string,
+  ) {
+    return this.service.cancel(id, userId);
   }
 }

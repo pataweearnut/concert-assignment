@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 @Entity()
-@Unique(['userId', 'concertId'])
+@Unique(['concertId', 'userId'])
 export class Reservation {
   @PrimaryGeneratedColumn()
   id: number;
@@ -16,5 +16,8 @@ export class Reservation {
   status: 'RESERVE' | 'CANCEL';
 
   @CreateDateColumn()
-  createdAt: Date;
+  reservedAt: Date;
+
+  @Column({ nullable: true })
+  cancelledAt: Date | null;
 }
