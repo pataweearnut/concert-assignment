@@ -44,7 +44,7 @@ export function ConcertList({ concerts, onDeleted }: ConcertListProps) {
     const reserve = async (id: number) => {
         setLoading(true);
         try {
-            await apiFetch(`/concerts/${id}/reserved`, {
+            await apiFetch(`/concerts/${id}/reserve`, {
                 method: 'POST',
                 userId,
                 role,

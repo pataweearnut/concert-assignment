@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Layout } from '../../components/Layout';
 import { apiFetch } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
-import { Concert } from '../../types';
+import { Concert } from '../../types/Concert';
 import { ConcertList } from '@/src/components/ConcertList';
 
 export default function UserHome() {
@@ -18,7 +18,7 @@ export default function UserHome() {
 
   useEffect(() => {
     fetchConcerts();
-  }, []);
+  }, [userId]);
 
   return (
     <Layout>

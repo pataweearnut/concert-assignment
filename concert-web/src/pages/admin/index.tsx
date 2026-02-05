@@ -67,7 +67,10 @@ export default function AdminDashboard() {
                 {activeTab === 'overview' ? (
                      <ConcertList
                         concerts={concerts}
-                        onDeleted={fetchConcerts}
+                        onDeleted={() => {
+                            fetchConcerts();
+                            fetchSummaryStats();
+                        }}
                     />
                 ) : <CreateConcert
                     onCreated={() => {

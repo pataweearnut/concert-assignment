@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { Role } from '../types';
+import { Role } from '../types/role';
 
 interface AuthState {
   userId: string;
@@ -11,10 +11,26 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 
+function generateUserId() {
+  return `user-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [userId, setUserId] = useState('demo-user');
+  const [userId, setUserId] = useState<string>('demo-user');
   const [role, setRole] = useState<Role>('ADMIN');
+
+  useEffect(() => {
+    const storedUserId = localStorage.getItem('demo-user-id');
+
+    if (storedUserId) {
+      setUserId(storedUserId);
+    } else {
+      const newUserId = generateUserId();
+      localStorage.setItem('demo-user-id', newUserId);
+      setUserId(newUserId);
+    }
+  }, []);
 
   useEffect(() => {
     if (router.pathname.startsWith('/admin')) {
@@ -30,14 +46,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    const newUserId = generateUserId();
+    localStorage.setItem('demo-user-id', newUserId);
+
+    setUserId(newUserId);
     setRole('USER');
-    setUserId('demo-user');
     router.push('/user');
   };
 
   return (
     <AuthContext.Provider
-      value={{ role, userId, switchRole, logout }}
+      value={{ userId, role, switchRole, logout }}
     >
       {children}
     </AuthContext.Provider>
