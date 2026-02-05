@@ -13,7 +13,7 @@ async function bootstrap() {
     }),
   );
 
-
+  app.enableCors();
   app.useGlobalFilters(new AllExceptionsFilter());
 
   await app.listen(3001);
