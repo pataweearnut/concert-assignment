@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { ConcertsService } from "./concerts.service";
 import { CreateConcertDto } from "./dto/create-concert.dto";
-import { UserId } from "src/common/decorators/user-id.decorator";
-import { AdminGuard } from "src/common/guards/admin.guard";
-import { UserGuard } from "src/common/guards/user.gaurd";
+import { UserId } from "../common/decorators/user-id.decorator";
+import { AdminGuard } from "../common/guards/admin.guard";
+import { UserGuard } from "../common/guards/user.gaurd";
 
 @Controller('concerts')
 export class ConcertsController {

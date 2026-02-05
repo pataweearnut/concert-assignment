@@ -1,6 +1,6 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { StatisticsService } from './statistics.service';
-import { AdminGuard } from 'src/common/guards/admin.guard';
+import { AdminGuard } from '../common/guards/admin.guard';
 
 @UseGuards(AdminGuard)
 @Controller('statistics')

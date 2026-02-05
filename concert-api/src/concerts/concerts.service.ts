@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { CreateConcertDto } from './dto/create-concert.dto';
 import { Concert } from './concerts.entity';
 import { Reservation } from '../reservations/reservation.entity';
-import { ReservationStatus } from 'src/utils/constants';
+import { ReservationStatus } from '../utils/constants';
 
 @Injectable()
 export class ConcertsService {
