@@ -1,4 +1,4 @@
-import { Role } from ".";
+import { Role } from "./role";
 
 export interface SidebarItem {
     label: string;
