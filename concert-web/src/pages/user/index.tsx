@@ -11,9 +11,9 @@ export default function UserHome() {
 
   const fetchConcerts = () =>
     apiFetch<Concert[]>('/concerts/reservations', {
-        method: 'GET',
-        userId,
-        role,
+      method: 'GET',
+      userId,
+      role,
     }).then(setConcerts);
 
   useEffect(() => {
@@ -23,10 +23,7 @@ export default function UserHome() {
   return (
     <Layout>
       <div className="min-h-screen p-10">
-        <ConcertList
-            concerts={concerts}
-            onDeleted={fetchConcerts}
-        />
+        <ConcertList concerts={concerts} onDeleted={fetchConcerts} />
       </div>
     </Layout>
   );

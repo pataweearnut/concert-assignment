@@ -8,7 +8,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <AuthProvider>
       <main className={robotoFont.className}>
-        <Toaster position="top-right"/>
+        <Toaster position="top-right" />
         <Component {...pageProps} />
       </main>
     </AuthProvider>

@@ -5,7 +5,7 @@ interface SummaryCardProps {
   value: number;
   icon: string;
   bgcolor: string;
-};
+}
 
 export function SummaryCard(props: SummaryCardProps) {
   return (

@@ -12,5 +12,5 @@ export const SIDEBAR_MENU_CONFIG: SidebarItem[] = [
     href: '/admin/history',
     icon: '/images/inbox.svg',
     roles: ['ADMIN'],
-  }
+  },
 ];

@@ -9,13 +9,9 @@ interface CreateConcertForm {
   name: string;
   description: string;
   totalSeats: number;
-};
+}
 
-export function CreateConcert({
-  onCreated,
-}: {
-  onCreated: () => void;
-}) {
+export function CreateConcert({ onCreated }: { onCreated: () => void }) {
   const { userId, role } = useAuth();
 
   const [form, setForm] = useState<CreateConcertForm>({
@@ -27,11 +23,7 @@ export function CreateConcert({
   const [loading, setLoading] = useState(false);
 
   const isValid = useMemo(() => {
-    return (
-      form.name.trim().length > 0 &&
-      form.description.trim().length > 0 &&
-      form.totalSeats > 0
-    );
+    return form.name.trim().length > 0 && form.description.trim().length > 0 && form.totalSeats > 0;
   }, [form]);
 
   const submit = async () => {
@@ -71,34 +63,26 @@ export function CreateConcert({
 
   return (
     <div className="bg-white text-black rounded-xl p-10 border border-[#C2C2C2]">
-      <h2 className="text-[28px] md:text-[40px] font-semibold text-[#1692EC] mb-2">
-        Create
-      </h2>
+      <h2 className="text-[28px] md:text-[40px] font-semibold text-[#1692EC] mb-2">Create</h2>
       <hr className="mb-6 border-[#C2C2C2]" />
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-[24px] mb-2">
-              Concert Name
-            </label>
+            <label className="block text-[24px] mb-2">Concert Name</label>
             <input
               value={form.name}
-              onChange={e =>
-                setForm({ ...form, name: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Please input concert name"
               className="w-full border border-gray-400 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
           <div>
-            <label className="block text-[24px] mb-2">
-              Total of seat
-            </label>
+            <label className="block text-[24px] mb-2">Total of seat</label>
             <div className="relative">
               <input
                 type="number"
                 value={form.totalSeats}
-                onChange={e =>
+                onChange={(e) =>
                   setForm({
                     ...form,
                     totalSeats: Number(e.target.value),
@@ -119,14 +103,10 @@ export function CreateConcert({
           </div>
         </div>
         <div>
-          <label className="block text-[24px] mb-2">
-            Description
-          </label>
+          <label className="block text-[24px] mb-2">Description</label>
           <textarea
             value={form.description}
-            onChange={e =>
-              setForm({ ...form, description: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
             placeholder="Please input description"
             rows={4}
             className="w-full border border-gray-400 rounded-md px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -137,9 +117,10 @@ export function CreateConcert({
             onClick={submit}
             disabled={!isValid || loading}
             className={`flex items-center gap-2 px-6 py-3 rounded-md text-white transition
-              ${!isValid || loading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-500 hover:bg-blue-600'
+              ${
+                !isValid || loading
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-500 hover:bg-blue-600'
               }
             `}
           >
@@ -150,12 +131,7 @@ export function CreateConcert({
               </>
             ) : (
               <>
-                <Image
-                  src="/images/save.svg"
-                  alt="save"
-                  width={24}
-                  height={24}
-                />
+                <Image src="/images/save.svg" alt="save" width={24} height={24} />
                 Save
               </>
             )}

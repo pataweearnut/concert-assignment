@@ -19,11 +19,10 @@ export function ConfirmDeleteModal({
   if (!open) return null;
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center ${ibmPlexSansThaiFont.className}`}>
-      <div
-        className="absolute inset-0 bg-black/50"
-        onClick={onCancel}
-      />
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center ${ibmPlexSansThaiFont.className}`}
+    >
+      <div className="absolute inset-0 bg-black/50" onClick={onCancel} />
 
       <div className="relative bg-white rounded-xl shadow-lg w-[420px] p-6 text-center z-10">
         <div className="flex justify-center mb-4">
@@ -32,9 +31,7 @@ export function ConfirmDeleteModal({
           </div>
         </div>
 
-        <h3 className="text-[20px] font-bold mb-2">
-          Are you sure to delete?
-        </h3>
+        <h3 className="text-[20px] font-bold mb-2">Are you sure to delete?</h3>
 
         <p className="text-[20px] font-bold mb-6">
           “<span className="font-semibold">{title}</span>”

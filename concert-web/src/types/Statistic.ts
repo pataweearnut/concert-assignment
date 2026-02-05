@@ -1,5 +1,5 @@
 export interface Statistics {
-    totalSeats: number;
-    totalReserved: number;
-    totalCanceled: number;
-  }
+  totalSeats: number;
+  totalReserved: number;
+  totalCanceled: number;
+}
