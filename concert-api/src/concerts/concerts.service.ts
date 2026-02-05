@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, ServiceUnavailableException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateConcertDto } from './dto/create-concert.dto';
@@ -11,9 +15,10 @@ export class ConcertsService {
   constructor(
     @InjectRepository(Concert)
     private readonly concertRepo: Repository<Concert>,
+
     @InjectRepository(Reservation)
     private readonly reservationRepo: Repository<Reservation>,
-  ) { }
+  ) {}
 
   async create(dto: CreateConcertDto): Promise<Concert> {
     return this.concertRepo.save({
@@ -27,12 +32,16 @@ export class ConcertsService {
   }
 
   async delete(id: number): Promise<void> {
-    await this.concertRepo.delete(id);
+    const { affected } = await this.concertRepo.delete(id);
+    if (!affected) {
+      throw new NotFoundException('Concert not found');
+    }
   }
 
   async reserve(concertId: number, userId: string): Promise<Reservation> {
-    const seatUpdated = await this.decrementSeat(concertId);
+    await this.assertConcertExists(concertId);
 
+    const seatUpdated = await this.decrementSeat(concertId);
     if (!seatUpdated) {
       throw new BadRequestException('No seats left');
     }
@@ -55,6 +64,8 @@ export class ConcertsService {
   }
 
   async cancel(concertId: number, userId: string): Promise<void> {
+    await this.assertConcertExists(concertId);
+
     await this.concertRepo.manager.transaction(async (manager) => {
       const reservationRepo = manager.getRepository(Reservation);
       const concertRepo = manager.getRepository(Concert);
@@ -81,23 +92,17 @@ export class ConcertsService {
     });
   }
 
-
   private async decrementSeat(concertId: number): Promise<boolean> {
-    try {
-      const result = await this.concertRepo
-        .createQueryBuilder()
-        .update(Concert)
-        .set({ availableSeats: () => 'availableSeats - 1' })
-        .where('id = :id', { id: concertId })
-        .andWhere('availableSeats > 0')
-        .execute();
+    const result = await this.concertRepo
+      .createQueryBuilder()
+      .update(Concert)
+      .set({ availableSeats: () => 'availableSeats - 1' })
+      .where('id = :id', { id: concertId })
+      .andWhere('availableSeats > 0')
+      .execute();
 
-      return result.affected === 1;
-    } catch (error) {
-      throw new ServiceUnavailableException('Seat service unavailable');
-    }
+    return result.affected === 1;
   }
-
 
   private async restoreSeat(concertId: number): Promise<void> {
     await this.concertRepo.increment(
@@ -105,5 +110,15 @@ export class ConcertsService {
       'availableSeats',
       1,
     );
+  }
+
+  private async assertConcertExists(concertId: number): Promise<void> {
+    const exists = await this.concertRepo.findOne({
+      where: { id: concertId },
+    });
+
+    if (!exists) {
+      throw new NotFoundException('Concert not found');
+    }
   }
 }
