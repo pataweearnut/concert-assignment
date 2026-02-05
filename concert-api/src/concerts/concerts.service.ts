@@ -31,6 +31,42 @@ export class ConcertsService {
     return this.concertRepo.find();
   }
 
+  async findAllWithReservation(
+    userId: string,
+  ): Promise<(Concert & { isReservedByUser: boolean })[]> {
+    const concerts = await this.concertRepo.find();
+  
+    if (!userId) {
+      return concerts.map(c => ({
+        ...c,
+        isReservedByUser: false,
+      }));
+    }
+  
+    // Get ALL reservations for this user, newest first
+    const reservations = await this.reservationRepo.find({
+      where: { userId },
+      order: { createdAt: 'DESC' },
+    });
+  
+    // Track latest state per concert
+    const latestStatusByConcert = new Map<number, ReservationStatus>();
+  
+    for (const r of reservations) {
+      // first time we see a concertId = latest event
+      if (!latestStatusByConcert.has(r.concertId)) {
+        latestStatusByConcert.set(r.concertId, r.status);
+      }
+    }
+  
+    return concerts.map(c => ({
+      ...c,
+      isReservedByUser:
+        latestStatusByConcert.get(c.id) === ReservationStatus.RESERVE,
+    }));
+  }
+  
+
   async delete(id: number): Promise<void> {
     const { affected } = await this.concertRepo.delete(id);
     if (!affected) {
@@ -69,15 +105,19 @@ export class ConcertsService {
     await this.concertRepo.manager.transaction(async (manager) => {
       const reservationRepo = manager.getRepository(Reservation);
       const concertRepo = manager.getRepository(Concert);
-
-      const { affected } = await reservationRepo.delete({
-        concertId,
-        userId,
-        status: ReservationStatus.RESERVE,
+  
+      const hasActiveReservation = await reservationRepo.exist({
+        where: {
+          concertId,
+          userId,
+          status: ReservationStatus.RESERVE,
+        },
       });
-
-      if (!affected) return;
-
+  
+      if (!hasActiveReservation) {
+        return;
+      }
+  
       await concertRepo.increment(
         { id: concertId },
         'availableSeats',
@@ -91,6 +131,7 @@ export class ConcertsService {
       });
     });
   }
+  
 
   private async decrementSeat(concertId: number): Promise<boolean> {
     const result = await this.concertRepo

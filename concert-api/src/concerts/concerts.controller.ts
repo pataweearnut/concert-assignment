@@ -20,6 +20,13 @@ export class ConcertsController {
     return this.service.findAll();
   }
 
+  @Get('reservations')
+  findAllWithReservation(
+    @UserId() userId: string,
+  ) {
+    return this.service.findAllWithReservation(userId);
+  }
+
   @UseGuards(AdminGuard)
   @Delete(':id')
   delete(@Param('id') id: number) {

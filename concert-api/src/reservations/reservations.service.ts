@@ -12,7 +12,7 @@ export class ReservationsService {
 
   async findAll(): Promise<Reservation[]> {
     return this.repo.find({
-      order: { reservedAt: 'DESC' },
+      order: { createdAt: 'DESC' },
     });
   }
 }

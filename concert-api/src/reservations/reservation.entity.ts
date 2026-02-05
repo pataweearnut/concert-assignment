@@ -1,7 +1,7 @@
+import { ReservationStatus } from "src/utils/constants";
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 @Entity()
-@Unique(['concertId', 'userId'])
 export class Reservation {
   @PrimaryGeneratedColumn()
   id: number;
@@ -13,11 +13,8 @@ export class Reservation {
   userId: string;
 
   @Column()
-  status: 'RESERVE' | 'CANCEL';
+  status: ReservationStatus;
 
   @CreateDateColumn()
-  reservedAt: Date;
-
-  @Column({ nullable: true })
-  cancelledAt: Date | null;
+  createdAt: Date;
 }
